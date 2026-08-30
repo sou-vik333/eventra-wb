@@ -1,0 +1,19 @@
+{
+  "name": "eventra-wb-server",
+  "version": "1.0.0",
+  "description": "Eventra WB backend API",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "eventra",
+    "event-management",
+    "west-bengal"
+  ],
+  "author": "Souvik",
+  "license": "ISC"
+}
