@@ -1,20 +1,28 @@
+import AIPlannerCTA from '../../components/home/AIPlannerCTA'
+import EventCategories from '../../components/home/EventCategories'
+import FeaturedVendors from '../../components/home/FeaturedVendors'
+import HeroSection from '../../components/home/HeroSection'
+import HowItWorks from '../../components/home/HowItWorks'
+import LocationDiscovery from '../../components/home/LocationDiscovery'
+import ServiceCategories from '../../components/home/ServiceCategories'
+
 function HomePage() {
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-5xl font-bold text-slate-900">
-          Eventra WB
-        </h1>
+    <>
+      <HeroSection />
 
-        <p className="mt-4 text-lg text-slate-600">
-          Plan. Discover. Compare. Book.
-        </p>
+      <ServiceCategories />
 
-        <p className="mt-2 text-slate-500">
-          Your event, your way — across West Bengal.
-        </p>
-      </div>
-    </main>
+      <EventCategories />
+
+      <LocationDiscovery />
+
+      <FeaturedVendors />
+
+      <HowItWorks />
+
+      <AIPlannerCTA />
+    </>
   )
 }
 
