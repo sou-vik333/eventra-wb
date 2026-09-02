@@ -7,7 +7,8 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "contract:emit": "prisma contract emit"
   },
   "keywords": [
     "eventra",
@@ -15,5 +16,17 @@
     "west-bengal"
   ],
   "author": "Souvik",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
+    "@prisma/orm-postgres": "^8.0.0-rc.8",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "prisma": "^8.0.0-rc.12"
+  }
 }

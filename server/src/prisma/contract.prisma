@@ -1,0 +1,794 @@
+// use prisma-next
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  CUSTOMER
+  VENDOR
+  ADMIN
+}
+
+enum VendorStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  RAZORPAY
+  CARD
+  UPI
+  NET_BANKING
+  OTHER
+}
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  HIDDEN
+  REJECTED
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  PAYMENT_PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum EventType {
+  WEDDING
+  RECEPTION
+  BIRTHDAY
+  ANNAPRASHAN
+  RICE_CEREMONY
+  BABY_SHOWER
+  ENGAGEMENT
+  ANNIVERSARY
+  HOUSEWARMING
+  PUJA
+  CULTURAL_PROGRAM
+  CORPORATE_EVENT
+  COLLEGE_EVENT
+  PARTY
+  FUNERAL
+  OTHER
+}
+
+enum EventStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum EventTaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+
+// ============================================================
+// USER
+// ============================================================
+
+model User {
+  id                    Int      @id @default(autoincrement())
+  email                 String   @unique
+  username              String?  @unique
+  name                  String?
+  passwordHash          String
+  phone                 String?
+  role                  Role     @default(CUSTOMER)
+  isActive              Boolean  @default(true)
+
+  // Relations
+  vendor                Vendor?
+  admin                 Admin?
+  events                Event[]
+  reviews               Review[]
+  favourites            Favourite[]
+  notifications Notification[]
+  customerConversations Conversation[] @relation("CustomerConversations")
+  messages              Message[]
+  aiConversations AIConversation[]
+  reports Report[]
+  auditLogs AuditLog[]
+
+  createdAt DateTime @default(now())
+updatedAt temporal.updatedAt()
+
+  @@index([role])
+  @@index([isActive])
+}
+
+
+// ============================================================
+// VENDOR
+// ============================================================
+
+model Vendor {
+  id                    Int          @id @default(autoincrement())
+  userId                Int          @unique
+  businessName          String
+  description           String?
+  phone                 String?
+  email                 String?
+  status                VendorStatus @default(PENDING)
+  isVerified            Boolean      @default(false)
+
+  // Relations
+  user                  User             @relation(fields: [userId], references: [id])
+  services              Service[]
+  locations             VendorLocation[]
+  bookings              Booking[]
+  reviews               Review[]
+  favourites            Favourite[]
+  media Media[]
+  packages       Package[]
+  availability VendorAvailability[]
+  workingHours VendorWorkingHour[]
+  aiRecommendations AIRecommendation[]
+  vendorConversations   Conversation[] @relation("VendorConversations")
+
+  createdAt             DateTime @default(now())
+  updatedAt temporal.updatedAt()
+
+  @@index([status])
+  @@index([isVerified])
+}
+
+
+// ============================================================
+// SERVICE CATEGORY
+// ============================================================
+
+model ServiceCategory {
+  id                    Int       @id @default(autoincrement())
+  name                  String    @unique
+  description           String?
+  isActive              Boolean   @default(true)
+
+  services              Service[]
+
+  createdAt             DateTime @default(now())
+  updatedAt temporal.updatedAt()
+
+  @@index([isActive])
+}
+
+
+// ============================================================
+// SERVICE
+// ============================================================
+
+model Service {
+  id                    Int             @id @default(autoincrement())
+  vendorId              Int
+  categoryId            Int
+
+  name                  String
+  description           String?
+  basePrice             Decimal
+  durationMinutes Int?
+  isActive              Boolean         @default(true)
+
+  // Relations
+  vendor                Vendor          @relation(fields: [vendorId], references: [id])
+  category              ServiceCategory @relation(fields: [categoryId], references: [id])
+  bookings              Booking[]
+  packages PackageService[]
+  aiRecommendations AIRecommendation[]
+  createdAt             DateTime @default(now())
+  updatedAt temporal.updatedAt()
+
+  @@index([vendorId])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([basePrice])
+}
+
+
+// ============================================================
+// LOCATION
+// ============================================================
+
+model Location {
+  id                    Int              @id @default(autoincrement())
+  district              String
+  city                  String?
+  area                  String?
+  pincode               String?
+  state                 String           @default("West Bengal")
+
+  vendorLocations       VendorLocation[]
+  events Event[]
+  createdAt             DateTime @default(now())
+updatedAt temporal.updatedAt()
+  @@index([district])
+  @@index([city])
+  @@index([pincode])
+}
+
+
+// ============================================================
+// VENDOR LOCATION
+// ============================================================
+
+model VendorLocation {
+  vendorId              Int
+  locationId            Int
+
+  vendor                Vendor   @relation(fields: [vendorId], references: [id])
+  location              Location @relation(fields: [locationId], references: [id])
+
+  @@id([vendorId, locationId])
+  @@index([locationId])
+}
+
+
+// ============================================================
+// BOOKING
+// ============================================================
+
+model Booking {
+  id                    Int           @id @default(autoincrement())
+
+  eventId               Int
+  vendorId              Int
+  serviceId             Int
+
+  status                BookingStatus @default(PENDING)
+
+  bookingDate           DateTime      @default(now())
+  eventDate             DateTime?
+  startTime DateTime?
+  endTime   DateTime?
+  quantity              Int           @default(1)
+  totalAmount           Decimal
+  notes                 String?
+
+  // Relations
+  event                 Event         @relation(fields: [eventId], references: [id])
+  vendor                Vendor        @relation(fields: [vendorId], references: [id])
+  service               Service       @relation(fields: [serviceId], references: [id])
+
+  payment               Payment?
+  reviews               Review[]
+  statusHistory BookingStatusHistory[]
+  createdAt             DateTime @default(now())
+updatedAt temporal.updatedAt()
+  @@index([eventId])
+  @@index([vendorId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([eventDate])
+}
+
+
+// ============================================================
+// PAYMENT
+// ============================================================
+
+model Payment {
+  id                    Int           @id @default(autoincrement())
+
+  bookingId             Int           @unique
+  amount                Decimal
+
+  status                PaymentStatus @default(PENDING)
+  method                PaymentMethod?
+
+  transactionId         String?
+  paidAt                DateTime?
+
+  // Relations
+  booking               Booking       @relation(fields: [bookingId], references: [id])
+  transactions          Transaction[]
+
+  createdAt             DateTime @default(now())
+updatedAt temporal.updatedAt()
+  @@index([status])
+}
+
+
+// ============================================================
+// TRANSACTION
+// ============================================================
+
+model Transaction {
+  id                    Int           @id @default(autoincrement())
+
+  paymentId             Int
+  gateway               String
+  gatewayId             String?
+  amount                Decimal
+  status                PaymentStatus
+  metadata              String?
+
+  // Relations
+  payment               Payment @relation(fields: [paymentId], references: [id])
+
+  createdAt             DateTime @default(now())
+
+  @@index([paymentId])
+  @@index([gatewayId])
+  @@index([status])
+}
+
+
+// ============================================================
+// REVIEW
+// ============================================================
+
+model Review {
+  id                    Int          @id @default(autoincrement())
+
+  userId                Int
+  vendorId              Int
+  bookingId             Int          @unique
+
+  rating                Int
+  comment               String?
+
+  status                ReviewStatus @default(PENDING)
+
+  // Relations
+  user                  User         @relation(fields: [userId], references: [id])
+  vendor                Vendor       @relation(fields: [vendorId], references: [id])
+  booking               Booking      @relation(fields: [bookingId], references: [id])
+
+  createdAt             DateTime @default(now())
+updatedAt temporal.updatedAt()
+  @@index([userId])
+  @@index([vendorId])
+  @@index([status])
+}
+
+
+// ============================================================
+// FAVOURITE
+// ============================================================
+
+model Favourite {
+  id                    Int      @id @default(autoincrement())
+
+  userId                Int
+  vendorId              Int
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id])
+  vendor                Vendor   @relation(fields: [vendorId], references: [id])
+
+  createdAt             DateTime @default(now())
+
+  @@unique([userId, vendorId])
+  @@index([vendorId])
+}
+
+
+// ============================================================
+// EVENT
+// ============================================================
+
+model Event {
+  id                    Int             @id @default(autoincrement())
+
+  userId                Int
+
+  name                  String
+  type                  EventType
+  description           String?
+
+  eventDate             DateTime?
+  guestCount            Int?
+  budget                Decimal?
+  budgetNotes String?
+  locationId Int?
+  status                EventStatus     @default(PLANNING)
+
+  // Relations
+  user                  User            @relation(fields: [userId], references: [id])
+  location Location? @relation(fields: [locationId], references: [id])
+  tasks                 EventTask[]
+  bookings              Booking[]
+
+  createdAt             DateTime @default(now())
+updatedAt temporal.updatedAt()
+  @@index([userId])
+  @@index([eventDate])
+  @@index([type])
+  @@index([status])
+}
+
+
+// ============================================================
+// EVENT TASK
+// ============================================================
+
+model EventTask {
+  id                    Int             @id @default(autoincrement())
+
+  eventId               Int
+
+  title                 String
+  description           String?
+  dueDate               DateTime?
+
+  status                EventTaskStatus @default(TODO)
+
+  // Relations
+  event                 Event           @relation(fields: [eventId], references: [id])
+
+  createdAt             DateTime @default(now())
+updatedAt temporal.updatedAt()
+  @@index([eventId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+
+// ============================================================
+// CONVERSATION
+// ============================================================
+
+model Conversation {
+  id                    Int      @id @default(autoincrement())
+
+  customerId            Int
+  vendorId              Int
+
+  // Relations
+  customer              User     @relation(
+    "CustomerConversations",
+    fields: [customerId],
+    references: [id]
+  )
+
+  vendor                Vendor   @relation(
+    "VendorConversations",
+    fields: [vendorId],
+    references: [id]
+  )
+
+  messages              Message[]
+
+  createdAt             DateTime @default(now())
+updatedAt temporal.updatedAt()
+  @@unique([customerId, vendorId])
+  @@index([customerId])
+  @@index([vendorId])
+}
+
+
+// ============================================================
+// MESSAGE
+// ============================================================
+
+model Message {
+  id                    Int           @id @default(autoincrement())
+
+  conversationId        Int
+  senderId              Int
+
+  content               String
+
+  type                  MessageType   @default(TEXT)
+  status                MessageStatus @default(SENT)
+
+  // Relations
+  conversation          Conversation  @relation(fields: [conversationId], references: [id])
+  sender                User          @relation(fields: [senderId], references: [id])
+
+  createdAt             DateTime @default(now())
+updatedAt temporal.updatedAt()
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([status])
+  @@index([createdAt])
+}
+enum NotificationType {
+  BOOKING
+  PAYMENT
+  MESSAGE
+  REVIEW
+  SYSTEM
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+}
+
+model Notification {
+  id        Int                  @id @default(autoincrement())
+  userId    Int
+
+  type      NotificationType
+  title     String
+  message   String
+  status    NotificationStatus  @default(UNREAD)
+
+  user      User                @relation(fields: [userId], references: [id])
+
+  createdAt DateTime             @default(now())
+  updatedAt temporal.updatedAt()
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum AIMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model AIConversation {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  title     String?
+
+  user      User        @relation(fields: [userId], references: [id])
+  messages  AIMessage[]
+  recommendations AIRecommendation[]
+
+  createdAt DateTime    @default(now())
+  updatedAt temporal.updatedAt()
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model AIMessage {
+  id             Int             @id @default(autoincrement())
+  conversationId Int
+  role           AIMessageRole
+  content        String
+
+  conversation   AIConversation  @relation(fields: [conversationId], references: [id])
+
+  createdAt      DateTime        @default(now())
+
+  @@index([conversationId])
+  @@index([role])
+  @@index([createdAt])
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  REJECTED
+}
+
+model Report {
+  id          Int          @id @default(autoincrement())
+
+  reporterId  Int
+  reportedId  Int?
+
+  subject     String
+  description String
+  status      ReportStatus @default(PENDING)
+
+  reporter    User         @relation(fields: [reporterId], references: [id])
+
+  createdAt   DateTime     @default(now())
+  updatedAt   temporal.updatedAt()
+
+  @@index([reporterId])
+  @@index([reportedId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+
+  userId      Int?
+  action      String
+  entity      String
+  entityId    Int?
+  description String?
+  metadata    String?
+
+  user        User?    @relation(fields: [userId], references: [id])
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@index([entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  REEL
+}
+
+model Media {
+  id          Int       @id @default(autoincrement())
+
+  vendorId    Int
+  title       String?
+  description String?
+  url         String
+  publicId    String?
+  type        MediaType
+  isActive    Boolean   @default(true)
+
+  vendor      Vendor    @relation(fields: [vendorId], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   temporal.updatedAt()
+
+  @@index([vendorId])
+  @@index([type])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model Package {
+  id          Int       @id @default(autoincrement())
+
+  vendorId    Int
+  name        String
+  description String?
+  price       Decimal
+  isActive    Boolean   @default(true)
+
+  vendor      Vendor    @relation(fields: [vendorId], references: [id])
+  services PackageService[]
+  createdAt   DateTime  @default(now())
+  updatedAt   temporal.updatedAt()
+
+  @@index([vendorId])
+  @@index([isActive])
+  @@index([price])
+}
+
+model PackageService {
+  packageId  Int
+  serviceId  Int
+  quantity   Int  @default(1)
+
+  package    Package @relation(fields: [packageId], references: [id])
+  service    Service @relation(fields: [serviceId], references: [id])
+
+  @@id([packageId, serviceId])
+  @@index([serviceId])
+}
+
+model VendorAvailability {
+  id        Int      @id @default(autoincrement())
+
+  vendorId  Int
+  date      DateTime
+  isAvailable Boolean @default(true)
+  notes     String?
+
+  vendor    Vendor   @relation(fields: [vendorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+
+  @@unique([vendorId, date])
+  @@index([vendorId])
+  @@index([date])
+  @@index([isAvailable])
+}
+
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model VendorWorkingHour {
+  id         Int      @id @default(autoincrement())
+
+  vendorId   Int
+  dayOfWeek WeekDay
+
+  startTime  String
+  endTime    String
+
+  isActive   Boolean  @default(true)
+
+  vendor     Vendor   @relation(fields: [vendorId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  temporal.updatedAt()
+
+  @@unique([vendorId, dayOfWeek])
+  @@index([vendorId])
+  @@index([dayOfWeek])
+}
+
+model BookingStatusHistory {
+  id          Int           @id @default(autoincrement())
+
+  bookingId   Int
+  status      BookingStatus
+  note        String?
+
+  booking     Booking       @relation(fields: [bookingId], references: [id])
+
+  createdAt   DateTime      @default(now())
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AIRecommendation {
+  id             Int      @id @default(autoincrement())
+
+  conversationId Int
+  vendorId       Int
+  serviceId      Int?
+
+  score          Decimal?
+  reason         String?
+
+  conversation   AIConversation @relation(fields: [conversationId], references: [id])
+  vendor         Vendor        @relation(fields: [vendorId], references: [id])
+  service        Service?      @relation(fields: [serviceId], references: [id])
+
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([vendorId])
+  @@index([serviceId])
+  @@index([score])
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+
+  @@index([userId])
+}
+
