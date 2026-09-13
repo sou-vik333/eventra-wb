@@ -9,9 +9,7 @@ export async function findVendorByUserId(userId: number) {
 }
 
 export async function findVendorById(id: number) {
-  return Vendor.first({
-    id,
-  });
+  return Vendor.first({ id });
 }
 
 export async function getAllVendors() {

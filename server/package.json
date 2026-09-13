@@ -23,6 +23,7 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "jsonwebtoken": "^9.0.3",
+    "razorpay": "^2.9.8",
     "zod": "^4.5.4"
   },
   "devDependencies": {

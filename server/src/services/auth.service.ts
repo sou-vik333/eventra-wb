@@ -3,17 +3,17 @@ import bcrypt from "bcryptjs";
 import {
   createUser,
   findUserByEmail,
-} from "../repositories/user.repository";
+} from "../repositories/user.repository.js";
 
 import {
   generateToken,
   type JwtPayload,
-} from "../utils/jwt";
+} from "../utils/jwt.js";
 
 import type {
   LoginInput,
   RegisterInput,
-} from "../validators/auth.validator";
+} from "../validators/auth.validator.js";
 
 export async function registerUser(input: RegisterInput) {
   // Check whether email is already registered
@@ -27,13 +27,15 @@ export async function registerUser(input: RegisterInput) {
   const passwordHash = await bcrypt.hash(input.password, 12);
 
   // Create user
+  // Public registration always creates a CUSTOMER.
+  // Users cannot choose VENDOR or ADMIN here.
   const user = await createUser({
     email: input.email,
     username: input.username ?? null,
     name: input.name ?? null,
     passwordHash,
     phone: input.phone ?? null,
-    role: input.role ?? "CUSTOMER",
+    role: "CUSTOMER",
     isActive: true,
   });
 

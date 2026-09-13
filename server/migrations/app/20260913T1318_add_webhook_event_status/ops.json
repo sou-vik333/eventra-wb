@@ -1,0 +1,125 @@
+[
+  {
+    "id": "column.public.razorpayWebhookEvent.status",
+    "label": "Add column \"status\" to \"razorpayWebhookEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "status",
+        "table": "razorpayWebhookEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"status\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "razorpayWebhookEvent",
+          "status"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"status\"",
+        "sql": "ALTER TABLE \"public\".\"razorpayWebhookEvent\" ADD COLUMN \"status\" text DEFAULT 'RECEIVED' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"status\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "razorpayWebhookEvent",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.razorpayWebhookEvent.razorpayWebhookEvent_status_check_9eba03e5",
+    "label": "Add check constraint \"razorpayWebhookEvent_status_check_9eba03e5\" on \"razorpayWebhookEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "razorpayWebhookEvent_status_check_9eba03e5",
+        "table": "razorpayWebhookEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"razorpayWebhookEvent_status_check_9eba03e5\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "razorpayWebhookEvent_status_check_9eba03e5",
+          "public",
+          "\"public\".\"razorpayWebhookEvent\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"razorpayWebhookEvent_status_check_9eba03e5\"",
+        "sql": "ALTER TABLE \"public\".\"razorpayWebhookEvent\" ADD CONSTRAINT \"razorpayWebhookEvent_status_check_9eba03e5\" CHECK (\"status\" IN ('RECEIVED', 'PROCESSING', 'PROCESSED', 'FAILED'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"razorpayWebhookEvent_status_check_9eba03e5\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "razorpayWebhookEvent_status_check_9eba03e5",
+          "public",
+          "\"public\".\"razorpayWebhookEvent\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.razorpayWebhookEvent.razorpayWebhookEvent_status_idx_e98638ab",
+    "label": "Create index \"razorpayWebhookEvent_status_idx_e98638ab\" on \"razorpayWebhookEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "razorpayWebhookEvent_status_idx_e98638ab",
+        "table": "razorpayWebhookEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"razorpayWebhookEvent_status_idx_e98638ab\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"razorpayWebhookEvent_status_idx_e98638ab\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"razorpayWebhookEvent_status_idx_e98638ab\"",
+        "sql": "CREATE INDEX \"razorpayWebhookEvent_status_idx_e98638ab\" ON \"public\".\"razorpayWebhookEvent\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"razorpayWebhookEvent_status_idx_e98638ab\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"razorpayWebhookEvent_status_idx_e98638ab\""
+        ]
+      }
+    ]
+  }
+]

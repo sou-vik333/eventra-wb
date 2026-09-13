@@ -4,10 +4,14 @@ import {
   loginSchema,
   registerSchema,
 } from "../validators/auth.validator.js";
+
 import {
   loginUser,
   registerUser,
 } from "../services/auth.service.js";
+
+import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
+
 export async function register(
   req: Request,
   res: Response,
@@ -65,7 +69,6 @@ export async function login(
     });
   }
 }
-import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 
 export function getMe(
   req: AuthenticatedRequest,

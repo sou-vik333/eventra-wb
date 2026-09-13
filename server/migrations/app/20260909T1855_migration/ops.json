@@ -1,0 +1,86 @@
+[
+  {
+    "id": "column.public.payment.razorpayOrderId",
+    "label": "Add column \"razorpayOrderId\" to \"payment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "razorpayOrderId",
+        "table": "payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"razorpayOrderId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "payment",
+          "razorpayOrderId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"razorpayOrderId\"",
+        "sql": "ALTER TABLE \"public\".\"payment\" ADD COLUMN \"razorpayOrderId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"razorpayOrderId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "payment",
+          "razorpayOrderId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.payment.payment_razorpayOrderId_key",
+    "label": "Add unique constraint on \"payment\" (razorpayOrderId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "payment_razorpayOrderId_key",
+        "table": "payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"payment_razorpayOrderId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "payment_razorpayOrderId_key",
+          "public",
+          "\"public\".\"payment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"payment_razorpayOrderId_key\"",
+        "sql": "ALTER TABLE \"public\".\"payment\" ADD CONSTRAINT \"payment_razorpayOrderId_key\" UNIQUE (\"razorpayOrderId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"payment_razorpayOrderId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "payment_razorpayOrderId_key",
+          "public",
+          "\"public\".\"payment\""
+        ]
+      }
+    ]
+  }
+]

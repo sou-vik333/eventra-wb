@@ -299,26 +299,20 @@ updatedAt temporal.updatedAt()
 // ============================================================
 
 model Payment {
-  id                    Int           @id @default(autoincrement())
-
-  bookingId             Int           @unique
-  amount                Decimal
-
-  status                PaymentStatus @default(PENDING)
-  method                PaymentMethod?
-
-  transactionId         String?
-  paidAt                DateTime?
-
-  // Relations
-  booking               Booking       @relation(fields: [bookingId], references: [id])
-  transactions          Transaction[]
-
-  createdAt             DateTime @default(now())
-updatedAt temporal.updatedAt()
+  id              Int           @id @default(autoincrement())
+  bookingId       Int           @unique
+  amount          Decimal
+  status          PaymentStatus @default(PENDING)
+  method          PaymentMethod?
+  transactionId   String?
+  razorpayOrderId String?       @unique
+  paidAt          DateTime?
+  booking         Booking       @relation(fields: [bookingId], references: [id])
+  transactions    Transaction[]
+  createdAt       DateTime      @default(now())
+  updatedAt       temporal.updatedAt()
   @@index([status])
 }
-
 
 // ============================================================
 // TRANSACTION
@@ -792,3 +786,21 @@ model Admin {
   @@index([userId])
 }
 
+enum RazorpayWebhookEventStatus {
+  RECEIVED
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+model RazorpayWebhookEvent {
+  id          Int                        @id @default(autoincrement())
+  eventId     String                     @unique
+  event       String
+  status      RazorpayWebhookEventStatus @default(RECEIVED)
+  processedAt DateTime                   @default(now())
+
+  @@index([event])
+  @@index([status])
+  @@index([processedAt])
+}

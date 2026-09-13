@@ -1,17 +1,18 @@
-import { db } from "../prisma/db";
+import { db } from "../prisma/db.js";
 
 const User = db.orm.public.User;
-
 export async function findUserByEmail(email: string) {
   return User.first({
     email,
   });
 }
+
 export async function findUserByUsername(username: string) {
   return User.first({
     username,
   });
 }
+
 export async function findUserById(id: number) {
   return User.first({
     id,

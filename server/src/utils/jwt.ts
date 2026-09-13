@@ -1,10 +1,13 @@
 import jwt from "jsonwebtoken";
+import "dotenv/config";
 
-const JWT_SECRET: string = process.env["JWT_SECRET"] ?? "";
+const jwtSecret = process.env["JWT_SECRET"];
 
-if (!JWT_SECRET) {
+if (!jwtSecret) {
   throw new Error("JWT_SECRET is not configured");
 }
+
+const JWT_SECRET: string = jwtSecret;
 
 export type JwtPayload = {
   userId: number;
