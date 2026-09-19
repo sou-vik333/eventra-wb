@@ -6,13 +6,14 @@ import healthRoutes from "./routes/health.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import vendorRoutes from "./routes/vendor.routes.js";
+import eventRoutes from "./routes/event.routes.js";
 import serviceCategoryRoutes from "./routes/service-category.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
 import vendorLocationRoutes from "./routes/vendor-location.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import mediaRoutes from "./routes/media.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
-
+import eventTaskRoutes from "./routes/event-task.routes.js";
 const app = express();
 
 app.use(
@@ -41,6 +42,8 @@ app.use("/api/v1/media", mediaRoutes);
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/events", eventRoutes);
+app.use("/api/v1/event-tasks", eventTaskRoutes);
 app.use("/api/v1/vendors", vendorRoutes);
 app.use("/api/v1/bookings", bookingRoutes);
 app.use("/api/v1/payments", paymentRoutes);

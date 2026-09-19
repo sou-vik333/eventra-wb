@@ -210,7 +210,32 @@ export async function getCustomerPayment(
 
   return payment;
 }
+export async function getCustomerPaymentByBookingId(
+  userId: number,
+  bookingId: number,
+) {
+  const bookingData = await findBookingForCustomer(
+    bookingId,
+    userId,
+  );
 
+  if (!bookingData) {
+    throw new Error(
+      "Booking not found or you do not have permission to access it",
+    );
+  }
+
+  const payment =
+    await findPaymentByBookingId(bookingId);
+
+  if (!payment) {
+    throw new Error(
+      "Payment not found for this booking",
+    );
+  }
+
+  return payment;
+}
 export async function getCustomerPaymentTransactions(
   userId: number,
   paymentId: number,

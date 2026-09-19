@@ -1,8 +1,9 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 
 import {
   createVendorProfile,
+  getVendorById,
   getVendorProfile,
   updateVendorProfile,
 } from "../services/vendor.service.js";
@@ -65,7 +66,48 @@ export async function getVendor(
       });
     }
 
-    const vendor = await getVendorProfile(req.user.userId);
+    const vendor = await getVendorProfile(
+      req.user.userId,
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        vendor,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+}
+
+export async function getVendorByIdController(
+  req: Request,
+  res: Response,
+) {
+  try {
+    const vendorId = Number(req.params.id);
+
+    if (!Number.isInteger(vendorId) || vendorId <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid vendor ID",
+      });
+    }
+
+    const vendor = await getVendorById(
+      vendorId,
+    );
 
     return res.status(200).json({
       success: true,

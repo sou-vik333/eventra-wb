@@ -72,6 +72,8 @@ function RazorpayPaymentButton({
                 response.razorpay_signature,
             });
 
+            setError("");
+
             setSuccess(
               "Payment successful and booking confirmed.",
             );

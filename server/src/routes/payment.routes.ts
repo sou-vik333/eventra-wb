@@ -11,6 +11,7 @@ import {
   createPayment,
   processPayment,
   getPayment,
+  getPaymentByBookingId,
   getPaymentTransactions,
   createRazorpayOrder,
   verifyRazorpayPayment,
@@ -43,12 +44,18 @@ router.post(
   authorize("CUSTOMER"),
   verifyRazorpayPayment,
 );
-
 router.get(
   "/:id/transactions",
   authenticate,
   authorize("CUSTOMER"),
   getPaymentTransactions,
+);
+
+router.get(
+  "/booking/:bookingId",
+  authenticate,
+  authorize("CUSTOMER"),
+  getPaymentByBookingId,
 );
 
 router.get(

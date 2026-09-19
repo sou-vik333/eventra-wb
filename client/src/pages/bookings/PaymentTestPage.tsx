@@ -21,7 +21,7 @@ function PaymentTestPage() {
             </p>
 
             <p className="font-semibold">
-              #9
+              #10
             </p>
 
             <p className="mt-4 text-sm text-gray-600">
@@ -29,7 +29,7 @@ function PaymentTestPage() {
             </p>
 
             <p className="font-semibold">
-              #2
+              #3
             </p>
 
             <p className="mt-4 text-sm text-gray-600">
@@ -37,16 +37,16 @@ function PaymentTestPage() {
             </p>
 
             <p className="text-2xl font-bold">
-              ₹20,000
+              ₹25,000
             </p>
           </div>
 
           <div className="mt-8">
             <RazorpayPaymentButton
-              paymentId={2}
-              amount={20000}
+              paymentId={3}
+              amount={25000}
               name="Eventra WB"
-              description="Eventra WB Test Booking #9"
+              description="Eventra WB Test Booking #10"
             />
           </div>
         </div>

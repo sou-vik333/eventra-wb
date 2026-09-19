@@ -45,6 +45,16 @@ export async function getPayment(
 
   return response.data;
 }
+export async function getPaymentByBookingId(
+  bookingId: number,
+) {
+  const response = await axios.get(
+    `${API_BASE_URL}/payments/booking/${bookingId}`,
+    { headers: getAuthHeaders() },
+  );
+
+  return response.data;
+}
 
 export async function createRazorpayOrder(
   paymentId: number,

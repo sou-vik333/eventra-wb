@@ -1,5 +1,6 @@
 import {
   createVendor,
+  findVendorById,
   findVendorByUserId,
   updateVendor,
 } from "../repositories/vendor.repository.js";
@@ -32,6 +33,17 @@ export async function getVendorProfile(userId: number) {
 
   if (!vendor) {
     throw new Error("Vendor profile not found");
+  }
+
+  return vendor;
+}
+export async function getVendorById(
+  vendorId: number,
+) {
+  const vendor = await findVendorById(vendorId);
+
+  if (!vendor) {
+    throw new Error("Vendor not found");
   }
 
   return vendor;

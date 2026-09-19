@@ -4,7 +4,8 @@ import {
   createCustomerPayment,
   processCustomerPayment,
   getCustomerPayment,
-  getCustomerPaymentTransactions,
+getCustomerPaymentByBookingId,
+getCustomerPaymentTransactions,
   createCustomerRazorpayOrder,
   verifyCustomerRazorpayPayment,
 } from "../services/payment.service.js";
@@ -131,7 +132,54 @@ export async function getPayment(
     });
   }
 }
+export async function getPaymentByBookingId(
+  req: Request,
+  res: Response,
+) {
+  try {
+    const userId = req.user?.userId;
 
+    if (!userId) {
+      return res.status(401).json({
+        message: "Authentication required",
+      });
+    }
+
+    const bookingId = Number(
+      req.params.bookingId,
+    );
+
+    if (
+      !Number.isInteger(bookingId) ||
+      bookingId <= 0
+    ) {
+      return res.status(400).json({
+        message: "Invalid booking ID",
+      });
+    }
+
+    const payment =
+      await getCustomerPaymentByBookingId(
+        userId,
+        bookingId,
+      );
+
+    return res.status(200).json({
+      message: "Payment retrieved successfully",
+      payment,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(404).json({
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
 export async function getPaymentTransactions(
   req: Request,
   res: Response,
