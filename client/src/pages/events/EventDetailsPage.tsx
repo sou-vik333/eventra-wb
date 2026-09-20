@@ -301,6 +301,18 @@ function EventDetailsPage() {
 
               <button
                 type="button"
+                onClick={() =>
+                  navigate(
+                    `/services?eventId=${event.id}`,
+                  )
+                }
+                className="rounded-lg border border-purple-300 bg-white px-5 py-2.5 text-sm font-medium text-purple-600 transition hover:bg-purple-50"
+              >
+                Find Services
+              </button>
+
+              <button
+                type="button"
                 onClick={handleDelete}
                 disabled={deleting}
                 className="rounded-lg border border-red-300 bg-white px-5 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"

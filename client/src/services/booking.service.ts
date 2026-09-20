@@ -29,3 +29,38 @@ export async function getEventBookings(
 
   return response.data;
 }
+export type CreateBookingInput = {
+  eventId: number;
+  vendorId: number;
+  serviceId: number;
+  eventDate?: string;
+  startTime?: string;
+  endTime?: string;
+  quantity?: number;
+  notes?: string;
+};
+export async function createBooking(
+  data: CreateBookingInput,
+) {
+  const response = await axios.post(
+    `${API_BASE_URL}/bookings`,
+    data,
+    {
+      headers: getAuthHeaders(),
+    },
+  );
+
+  return response.data;
+}
+export async function getBooking(
+  bookingId: number,
+) {
+  const response = await axios.get(
+    `${API_BASE_URL}/bookings/${bookingId}`,
+    {
+      headers: getAuthHeaders(),
+    },
+  );
+
+  return response.data;
+}

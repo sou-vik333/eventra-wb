@@ -13,3 +13,12 @@ export async function getServiceById(
 
   return response.data;
 }
+export async function getServicesByCategory(
+  categoryId: number,
+) {
+  const response = await axios.get(
+    `${API_BASE_URL}/services/category/${categoryId}`,
+  );
+
+  return response.data;
+}
