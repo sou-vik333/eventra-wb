@@ -3,8 +3,15 @@ import {
   useState,
 } from "react";
 
-import { getEventBookings } from "../../services/booking.service";
-import { getPaymentByBookingId } from "../../services/payment.service";
+import {
+  getEventBookings,
+  moveBookingToPaymentPending,
+} from "../../services/booking.service";
+
+import {
+  createPayment,
+  getPaymentByBookingId,
+} from "../../services/payment.service";
 
 import {
   getServiceById,
@@ -13,6 +20,8 @@ import {
 import {
   getVendorById,
 } from "../../services/vendor.service";
+
+import RazorpayPaymentButton from "../payment/RazorpayPaymentButton";
 
 type Booking = {
   id: number;
@@ -73,6 +82,9 @@ function BookingSummary({
 
   const [payments, setPayments] =
     useState<Record<number, Payment>>({});
+
+  const [processingBookingId, setProcessingBookingId] =
+    useState<number | null>(null);
 
   const [loading, setLoading] =
     useState(true);
@@ -272,6 +284,64 @@ function BookingSummary({
     };
   }, [eventId]);
 
+  async function handleProceedToPayment(
+    booking: Booking,
+  ) {
+    try {
+      setProcessingBookingId(booking.id);
+      setError(null);
+
+      const bookingResponse =
+        await moveBookingToPaymentPending(
+          booking.id,
+        );
+
+      const updatedBooking =
+        bookingResponse?.data?.booking;
+
+      setBookings((currentBookings) =>
+        currentBookings.map(
+          (currentBooking) =>
+            currentBooking.id === booking.id
+              ? {
+                  ...currentBooking,
+                  status:
+                    updatedBooking?.status ??
+                    "PAYMENT_PENDING",
+                }
+              : currentBooking,
+        ),
+      );
+
+      const paymentResponse =
+        await createPayment(booking.id);
+
+      const payment =
+        paymentResponse?.payment;
+
+      if (!payment?.id) {
+        throw new Error(
+          "Payment could not be created",
+        );
+      }
+
+      setPayments((currentPayments) => ({
+        ...currentPayments,
+        [booking.id]: payment,
+      }));
+    } catch (paymentError) {
+      if (paymentError instanceof Error) {
+        setError(paymentError.message);
+      } else {
+        setError(
+          "Unable to start payment",
+        );
+      }
+    } finally {
+      setProcessingBookingId(null);
+    }
+  }
+
   if (loading) {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -286,7 +356,7 @@ function BookingSummary({
     );
   }
 
-  if (error) {
+  if (error && bookings.length === 0) {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-slate-900">
@@ -318,6 +388,12 @@ function BookingSummary({
         </span>
       </div>
 
+      {error && (
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
       {bookings.length === 0 ? (
         <div className="mt-5 rounded-xl border border-dashed border-slate-300 p-6 text-center">
           <p className="text-sm font-medium text-slate-700">
@@ -339,6 +415,10 @@ function BookingSummary({
 
             const payment =
               payments[booking.id];
+
+            const isProcessing =
+              processingBookingId ===
+              booking.id;
 
             return (
               <div
@@ -378,34 +458,92 @@ function BookingSummary({
                   </div>
                 </div>
 
-                {payment && (
+                {booking.status === "ACCEPTED" && (
                   <div className="mt-4 border-t border-slate-100 pt-4">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-700">
-                          Payment
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          {payment.method}
-                        </p>
-                      </div>
-
-                      <span className="inline-block w-fit rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                        {payment.status}
-                      </span>
-                    </div>
-
-                    {payment.paidAt && (
-                      <p className="mt-2 text-xs text-slate-500">
-                        Paid on{" "}
-                        {new Date(
-                          payment.paidAt,
-                        ).toLocaleString("en-IN")}
-                      </p>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleProceedToPayment(
+                          booking,
+                        )
+                      }
+                      disabled={isProcessing}
+                      className="w-full rounded-lg bg-purple-600 px-5 py-3 font-medium text-white transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isProcessing
+                        ? "Preparing Payment..."
+                        : "Proceed to Payment"}
+                    </button>
                   </div>
                 )}
+
+                {booking.status ===
+                  "PAYMENT_PENDING" &&
+                  payment && (
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-slate-700">
+                            Payment
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-500">
+                            {payment.method}
+                          </p>
+                        </div>
+
+                        <span className="inline-block w-fit rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-700">
+                          {payment.status}
+                        </span>
+                      </div>
+
+                      <div className="mt-4">
+                        <RazorpayPaymentButton
+                          paymentId={payment.id}
+                          amount={Number(
+                            payment.amount,
+                          )}
+                          name="Eventra WB"
+                          description={
+                            service
+                              ? service.name
+                              : "Eventra WB Event Service Booking"
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                {payment &&
+                  booking.status !==
+                    "PAYMENT_PENDING" && (
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-slate-700">
+                            Payment
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-500">
+                            {payment.method}
+                          </p>
+                        </div>
+
+                        <span className="inline-block w-fit rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                          {payment.status}
+                        </span>
+                      </div>
+
+                      {payment.paidAt && (
+                        <p className="mt-2 text-xs text-slate-500">
+                          Paid on{" "}
+                          {new Date(
+                            payment.paidAt,
+                          ).toLocaleString("en-IN")}
+                        </p>
+                      )}
+                    </div>
+                  )}
               </div>
             );
           })}

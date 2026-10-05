@@ -6,6 +6,7 @@ import {
   getEventBookingsController,
   getVendorBookingsController,
   updateVendorBookingStatusController,
+  moveBookingToPaymentPendingController,
 } from "../controllers/booking.controller.js";
 
 import { authenticate } from "../middleware/auth.middleware.js";
@@ -32,6 +33,13 @@ router.get(
   authenticate,
   authorize("CUSTOMER"),
   getEventBookingsController,
+);
+
+router.post(
+  "/:id/payment-pending",
+  authenticate,
+  authorize("CUSTOMER"),
+  moveBookingToPaymentPendingController,
 );
 
 router.get(

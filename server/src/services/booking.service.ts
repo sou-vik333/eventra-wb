@@ -266,3 +266,30 @@ export async function updateVendorBookingStatus(
     data.status,
   );
 }
+
+export async function moveBookingToPaymentPending(
+  userId: number,
+  bookingId: number,
+) {
+  const bookingData =
+    await findBookingForCustomer(
+      bookingId,
+      userId,
+    );
+
+  if (!bookingData) {
+    throw new Error(
+      "Booking not found or you do not have permission to modify it",
+    );
+  }
+
+  validateStatusTransition(
+    bookingData.booking.status,
+    "PAYMENT_PENDING",
+  );
+
+  return updateBookingStatus(
+    bookingId,
+    "PAYMENT_PENDING",
+  );
+}

@@ -7,6 +7,7 @@ import {
   getCustomerEventBookings,
   getVendorBookings,
   updateVendorBookingStatus,
+  moveBookingToPaymentPending,
 } from "../services/booking.service.js";
 
 import {
@@ -69,7 +70,10 @@ export async function getBookingController(
 
     const bookingId = Number(req.params.id);
 
-    if (!Number.isInteger(bookingId) || bookingId <= 0) {
+    if (
+      !Number.isInteger(bookingId) ||
+      bookingId <= 0
+    ) {
       return res.status(400).json({
         success: false,
         message: "Invalid booking ID",
@@ -116,17 +120,21 @@ export async function getEventBookingsController(
 
     const eventId = Number(req.params.eventId);
 
-    if (!Number.isInteger(eventId) || eventId <= 0) {
+    if (
+      !Number.isInteger(eventId) ||
+      eventId <= 0
+    ) {
       return res.status(400).json({
         success: false,
         message: "Invalid event ID",
       });
     }
 
-    const bookings = await getCustomerEventBookings(
-      eventId,
-      req.user.userId,
-    );
+    const bookings =
+      await getCustomerEventBookings(
+        eventId,
+        req.user.userId,
+      );
 
     return res.status(200).json({
       success: true,
@@ -200,24 +208,85 @@ export async function updateVendorBookingStatusController(
 
     const bookingId = Number(req.params.id);
 
-    if (!Number.isInteger(bookingId) || bookingId <= 0) {
+    if (
+      !Number.isInteger(bookingId) ||
+      bookingId <= 0
+    ) {
       return res.status(400).json({
         success: false,
         message: "Invalid booking ID",
       });
     }
 
-    const input = updateBookingStatusSchema.parse(req.body);
+    const input =
+      updateBookingStatusSchema.parse(
+        req.body,
+      );
 
-    const booking = await updateVendorBookingStatus(
-      req.user.userId,
-      bookingId,
-      input,
-    );
+    const booking =
+      await updateVendorBookingStatus(
+        req.user.userId,
+        bookingId,
+        input,
+      );
 
     return res.status(200).json({
       success: true,
-      message: "Booking status updated successfully",
+      message:
+        "Booking status updated successfully",
+      data: {
+        booking,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+}
+
+export async function moveBookingToPaymentPendingController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const bookingId = Number(req.params.id);
+
+    if (
+      !Number.isInteger(bookingId) ||
+      bookingId <= 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid booking ID",
+      });
+    }
+
+    const booking =
+      await moveBookingToPaymentPending(
+        req.user.userId,
+        bookingId,
+      );
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Booking is ready for payment",
       data: {
         booking,
       },
