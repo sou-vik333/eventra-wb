@@ -9,11 +9,14 @@ import vendorRoutes from "./routes/vendor.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import serviceCategoryRoutes from "./routes/service-category.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
+import packageRoutes from "./routes/package.routes.js";
 import vendorLocationRoutes from "./routes/vendor-location.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import mediaRoutes from "./routes/media.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
 import eventTaskRoutes from "./routes/event-task.routes.js";
+import reviewRoutes from "./routes/review.routes.js";
+
 const app = express();
 
 app.use(
@@ -22,13 +25,6 @@ app.use(
   }),
 );
 
-/*
- * Razorpay webhook needs the raw request body
- * for signature verification.
- *
- * This route is intentionally placed before
- * express.json().
- */
 app.use(
   "/api/v1/payments/webhook",
   express.raw({
@@ -46,12 +42,14 @@ app.use("/api/v1/events", eventRoutes);
 app.use("/api/v1/event-tasks", eventTaskRoutes);
 app.use("/api/v1/vendors", vendorRoutes);
 app.use("/api/v1/bookings", bookingRoutes);
+app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 app.use(
   "/api/v1/service-categories",
   serviceCategoryRoutes,
 );
 app.use("/api/v1/services", serviceRoutes);
+app.use("/api/v1/packages", packageRoutes);
 app.use(
   "/api/v1/vendor-locations",
   vendorLocationRoutes,

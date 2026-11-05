@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Link,
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
@@ -398,6 +399,13 @@ function ServicesPage() {
                           Status:{" "}
                           {vendor.status}
                         </p>
+
+                        <Link
+                          to={`/vendors/${service.vendorId}`}
+                          className="mt-3 inline-block text-sm font-medium text-blue-600 hover:underline"
+                        >
+                          View Vendor
+                        </Link>
                       </div>
                     )}
 

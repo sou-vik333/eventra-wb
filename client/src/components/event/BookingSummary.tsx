@@ -22,6 +22,7 @@ import {
 } from "../../services/vendor.service";
 
 import RazorpayPaymentButton from "../payment/RazorpayPaymentButton";
+import ReviewForm from "../review/ReviewForm";
 
 type Booking = {
   id: number;
@@ -544,6 +545,15 @@ function BookingSummary({
                       )}
                     </div>
                   )}
+
+                {booking.status ===
+                  "COMPLETED" && (
+                  <div className="mt-4 border-t border-slate-100 pt-4">
+                    <ReviewForm
+                      bookingId={booking.id}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}

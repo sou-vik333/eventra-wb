@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter,
   Route,
@@ -17,8 +18,16 @@ import CreateEventPage from "../pages/events/CreateEventPage";
 import EventDetailsPage from "../pages/events/EventDetailsPage";
 import EditEventPage from "../pages/events/EditEventPage";
 
+import PackagesPage from "../pages/packages/PackagesPage";
+import PackageDetailsPage from "../pages/packages/PackageDetailsPage";
 import ServicesPage from "../pages/services/ServicesPage";
+
+import VendorDashboardPage from "../pages/vendors/VendorDashboardPage";
+import VendorServicesPage from "../pages/vendors/VendorServicesPage";
 import VendorBookingsPage from "../pages/vendors/VendorBookingsPage";
+import VendorProfilePage from "../pages/vendors/VendorProfilePage";
+import VendorReviewsPage from "../pages/vendors/VendorReviewsPage";
+import VendorPackagesPage from "../pages/vendors/VendorPackagesPage";
 
 function AppRoutes() {
   return (
@@ -66,8 +75,43 @@ function AppRoutes() {
           />
 
           <Route
+            path="/packages"
+            element={<PackagesPage />}
+          />
+
+          <Route
+            path="/packages/:id"
+            element={<PackageDetailsPage />}
+          />
+
+          <Route
+            path="/vendors/:id"
+            element={<VendorProfilePage />}
+          />
+
+          <Route
+            path="/vendor/dashboard"
+            element={<VendorDashboardPage />}
+          />
+
+          <Route
+            path="/vendor/services"
+            element={<VendorServicesPage />}
+          />
+
+          <Route
+            path="/vendor/packages"
+            element={<VendorPackagesPage />}
+          />
+
+          <Route
             path="/vendor/bookings"
             element={<VendorBookingsPage />}
+          />
+
+          <Route
+            path="/vendor/reviews"
+            element={<VendorReviewsPage />}
           />
 
           <Route
